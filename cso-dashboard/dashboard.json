@@ -1,0 +1,298 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "title": {
+    "text": "Strategic Allocation Framework: Energy Poverty & Social Isolation",
+    "subtitle": "Data-Driven Targeting for Fuel Allowance & Housing Retrofit Grants",
+    "fontSize": 20,
+    "anchor": "start",
+    "offset": 20
+  },
+  "data": {
+    "url": "MyData.json",
+    "name": "myData"
+  },
+  "vconcat": [
+    {
+      "hconcat": [
+        {
+          "width": 400,
+          "height": 600,
+          "title": "Composite Vulnerability Index: Geographic Distribution (Yellow = High Risk)",
+          "data": {
+            "name": "mapData",
+            "url": "ireland-counties.json",
+            "format": {"type": "topojson", "feature": "IRL_adm1"}
+          },
+          "transform": [
+            {
+              "lookup": "properties.NAME_1",
+              "from": {
+                "data": {"name": "myData"},
+                "key": "County_Name",
+                "fields": [
+                  "Vulnerability_Score",
+                  "Median_Income",
+                  "Income_Risk_Index",
+                  "Alone_Rate",
+                  "Alone_Amount",
+                  "Q1_Q3_Ratio",
+                  "County_Name"
+                ]
+              }
+            }
+          ],
+          "projection": {"type": "mercator"},
+          "params": [
+            {
+              "name": "countySelect",
+              "select": {"type": "point", "fields": ["County_Name"]}
+            }
+          ],
+          "mark": {"type": "geoshape", "stroke": "white"},
+          "encoding": {
+            "color": {
+              "condition": {
+                "param": "countySelect",
+                "field": "Vulnerability_Score",
+                "type": "quantitative",
+                "scale": {"scheme": "viridis"},
+                "legend": {
+                  "title": "Vulnerability Score",
+                  "orient": "right",
+                  "gradientLength": 200
+                }
+              },
+              "value": "lightgray"
+            },
+            "tooltip": [
+              {"field": "County_Name", "title": "County"},
+              {
+                "field": "Vulnerability_Score",
+                "format": ".2f",
+                "title": "Vulnerability Score"
+              }
+            ]
+          }
+        },
+        {
+          "vconcat": [
+            {
+              "width": 500,
+              "height": 300,
+              "title": "Financial Resilience Context: Income Levels vs. Vulnerability Intensity",
+              "mark": "bar",
+              "params": [
+                {
+                  "name": "countySelect",
+                  "select": {"type": "point", "fields": ["County_Name"]}
+                }
+              ],
+              "encoding": {
+                "y": {
+                  "field": "County_Name",
+                  "type": "nominal",
+                  "sort": "-x",
+                  "title": "County Name"
+                },
+                "x": {
+                  "field": "Median_Income",
+                  "type": "quantitative",
+                  "title": "Median Household Income (€)"
+                },
+                "color": {
+                  "condition": {
+                    "param": "countySelect",
+                    "field": "Vulnerability_Score",
+                    "type": "quantitative",
+                    "scale": {"scheme": "viridis"},
+                    "legend": null
+                  },
+                  "value": "lightgray"
+                },
+                "opacity": {
+                  "condition": {"param": "countySelect", "value": 1},
+                  "value": 0.3
+                },
+                "tooltip": [
+                  {"field": "County_Name", "title": "County Name"},
+                  {"field": "Median_Income", "title": "Median Income(€)"}
+                ]
+              }
+            },
+            {
+              "width": 500,
+              "height": 200,
+              "title": "Policy Intervention Matrix: Structural Efficiency vs. Economic Risk",
+              "layer": [
+                {
+                  "data": {
+                    "values": [
+                      {
+                        "Zone": "1. Critical Action Zone (Top-Right)",
+                        "Risk": "High",
+                        "Energy_Stress": "High",
+                        "Policy": "Immediate Fuel Allowance + Retrofit Grants",
+                        "x_min": 1.45,
+                        "x_max": 1.52,
+                        "y_min": 1.1,
+                        "y_max": 1.4
+                      },
+                      {
+                        "Zone": "2. Structural Income Risk (Top-Left)",
+                        "Risk": "High",
+                        "Energy_Stress": "Low",
+                        "Policy": "Income Support / Social Welfare Priority",
+                        "x_min": 1.3,
+                        "x_max": 1.45,
+                        "y_min": 1.1,
+                        "y_max": 1.4
+                      },
+                      {
+                        "Zone": "3. Housing Efficiency Issue (Bottom-Right)",
+                        "Risk": "Low",
+                        "Energy_Stress": "High",
+                        "Policy": "Incentivize Private Retrofitting (Tax Breaks)",
+                        "x_min": 1.45,
+                        "x_max": 1.52,
+                        "y_min": 0.8,
+                        "y_max": 1.1
+                      },
+                      {
+                        "Zone": "4. Stable / Low Risk (Bottom-Left)",
+                        "Risk": "Low",
+                        "Energy_Stress": "Low",
+                        "Policy": "Monitor - No immediate intervention",
+                        "x_min": 1.3,
+                        "x_max": 1.45,
+                        "y_min": 0.8,
+                        "y_max": 1.1
+                      }
+                    ]
+                  },
+                  "mark": {"type": "rect", "opacity": 0},
+                  "encoding": {
+                    "x": {"field": "x_min", "type": "quantitative"},
+                    "x2": {"field": "x_max"},
+                    "y": {"field": "y_min", "type": "quantitative"},
+                    "y2": {"field": "y_max"},
+                    "tooltip": [
+                      {"field": "Zone", "title": "Region Classification"},
+                      {"field": "Policy", "title": "Recommended Policy"},
+                      {"field": "Risk", "title": "Income Risk Level"},
+                      {"field": "Energy_Stress", "title": "Seasonality Stress"}
+                    ]
+                  }
+                },
+                {
+                  "mark": {
+                    "type": "rule",
+                    "strokeDash": [4, 4],
+                    "color": "#555",
+                    "opacity": 0.8,
+                    "strokeWidth": 1.5
+                  },
+                  "encoding": {"x": {"datum": 1.45}}
+                },
+                {
+                  "mark": {
+                    "type": "rule",
+                    "strokeDash": [4, 4],
+                    "color": "#555",
+                    "opacity": 0.8,
+                    "strokeWidth": 1.5
+                  },
+                  "encoding": {"y": {"datum": 1.1}}
+                },
+                {
+                  "mark": {
+                    "type": "circle",
+                    "stroke": "black",
+                    "strokeWidth": 1,
+                    "opacity": 0.8
+                  },
+                  "params": [
+                    {
+                      "name": "countySelect",
+                      "select": {"type": "interval"}
+                    }
+                  ],
+                  "encoding": {
+                    "x": {
+                      "field": "Q1_Q3_Ratio",
+                      "type": "quantitative",
+                      "title": "Seasonal Heating Dependency (Q1/Q3 Ratio)",
+                      "scale": {"zero": false}
+                    },
+                    "y": {
+                      "field": "Income_Risk_Index",
+                      "type": "quantitative",
+                      "scale": {"zero": false},
+                      "title": "Economic Precarity Index (Normalized)"
+                    },
+                    "size": {
+                      "field": "Alone_Amount",
+                      "type": "quantitative",
+                      "scale": {"range": [100, 1000]},
+                      "legend": {"title": "Pop. Living Alone", "format": "s"}
+                    },
+                    "color": {
+                      "condition": {
+                        "param": "countySelect",
+                        "field": "Vulnerability_Score",
+                        "type": "quantitative",
+                        "scale": {"scheme": "viridis"},
+                        "legend": null
+                      },
+                      "value": "lightgray"
+                    },
+                    "opacity": {
+                      "condition": {"param": "countySelect", "value": 1},
+                      "value": 0.1
+                    },
+                    "tooltip": [
+                      {"field": "County_Name", "title": "County"},
+                      {
+                        "field": "Q1_Q3_Ratio",
+                        "title": "Q1-Q3 Ratio",
+                        "format": ".2f"
+                      },
+                      {
+                        "field": "Income_Risk_Index",
+                        "title": "Income Risk Index",
+                        "format": ".2f"
+                      },
+                      {
+                        "field": "Alone_Rate",
+                        "title": "Alone Rate (%)",
+                        "format": ".1f"
+                      },
+                      {"field": "Alone_Amount", "title": "Alone Amount"}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 920,
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "bottom",
+        "fontSize": 11,
+        "color": "gray",
+        "dy": 10
+      },
+      "data": {"values": [{}]},
+      "encoding": {
+        "text": {
+          "value": "Vulnerability Score = 1.0*Z(Alone) + 1.0*Z(Risk) - 1.5*Z(Q1/Q3) | Analysis: [Yangzong Baima]"
+        }
+      }
+    }
+  ],
+  "config": {}
+}

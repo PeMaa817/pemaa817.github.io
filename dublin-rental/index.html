@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>都柏林租房地图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Google Maps loaded dynamically after key is available -->
+<style>
+:root {
+  --bg: #f5f2eb;
+  --surface: #ffffff;
+  --surface2: #faf8f3;
+  --border: #e8e3d8;
+  --text: #1a1814;
+  --muted: #8a8070;
+  --accent: #e85d26;
+  --accent2: #2563eb;
+  --good: #16a34a;
+  --warn: #d97706;
+  --panel: 340px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 56px;
+  background: var(--text);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 1000;
+}
+
+.topbar-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: #fff;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.topbar-logo span { color: var(--accent); }
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #d44e1a; }
+
+.btn-ghost {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* ── LAYOUT ── */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--panel);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.sidebar-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+
+.tab-panel { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+.tab-panel.active { display: flex; }
+
+/* ── LISTING CARDS ── */
+.listing-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+.listing-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.listing-card:hover { border-color: #ccc; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.listing-card.active { border-color: var(--accent); background: #fff8f5; }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.card-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.card-price {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.card-addr {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ctag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 400;
+}
+
+.ctag-green  { background: #dcfce7; color: #15803d; }
+.ctag-orange { background: #fef3c7; color: #92400e; }
+.ctag-blue   { background: #dbeafe; color: #1e40af; }
+.ctag-gray   { background: #f3f4f6; color: #4b5563; }
+.ctag-red    { background: #fee2e2; color: #991b1b; }
+
+.card-dist {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.empty-icon { font-size: 40px; opacity: 0.4; }
+.empty-text { font-size: 13px; line-height: 1.6; }
+
+/* ── COMPARE PANEL ── */
+.compare-panel {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compare-hint {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.compare-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compare-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.compare-item:hover { border-color: #aaa; }
+.compare-item.selected { border-color: var(--accent2); background: #eff6ff; }
+
+.compare-item input[type=checkbox] { accent-color: var(--accent2); }
+
+.compare-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.compare-table th {
+  background: var(--surface2);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.compare-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .col-label { color: var(--muted); font-size: 11px; width: 80px; }
+.compare-best { color: var(--good); font-weight: 500; }
+.compare-worst { color: var(--accent); }
+
+/* ── SETTINGS PANEL ── */
+.settings-panel {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.poi-list { display: flex; flex-direction: column; gap: 6px; }
+
+.poi-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.poi-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.poi-name { flex: 1; font-weight: 500; }
+.poi-addr { font-size: 11px; color: var(--muted); }
+
+.poi-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-size: 14px; line-height: 1;
+  padding: 2px 4px; border-radius: 4px;
+  transition: color 0.1s;
+}
+.poi-remove:hover { color: var(--accent); }
+
+/* ── MAP ── */
+#map {
+  flex: 1;
+  z-index: 1;
+}
+
+/* Custom marker */
+.custom-marker {
+  position: relative;
+}
+
+.marker-bubble {
+  background: var(--text);
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.marker-bubble.accent { background: var(--accent); }
+.marker-bubble:hover { transform: scale(1.05); }
+
+.marker-poi {
+  background: var(--accent2);
+  color: #fff;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(16px);
+  transition: transform 0.2s;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 20px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.modal-close {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--muted);
+  transition: all 0.12s;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+
+.modal-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row.full { grid-template-columns: 1fr; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+input[type=text],
+input[type=number],
+textarea,
+select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px;
+  background: var(--surface2);
+  color: var(--text);
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+textarea { resize: vertical; min-height: 72px; }
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.12s;
+  user-select: none;
+}
+
+.checkbox-label:hover { border-color: #aaa; }
+.checkbox-label input { accent-color: var(--accent); }
+.checkbox-label.checked { border-color: var(--accent); background: #fff8f5; color: #c0410d; }
+
+.form-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+.btn-danger:hover { background: #fecaca; }
+
+/* ── POPUP ── */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  border: 1px solid var(--border);
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content { margin: 0 !important; width: auto !important; min-width: 220px; }
+
+.popup-inner { padding: 14px 16px; }
+.popup-name { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; margin-bottom:4px; }
+.popup-price { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--accent); margin-bottom:8px; }
+.popup-addr { font-size:11px; color:var(--muted); margin-bottom:8px; }
+.popup-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+.popup-note { font-size:11px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+.popup-actions { display:flex; gap:6px; }
+
+.leaflet-popup-tip-container { display: none !important; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--text);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 9999;
+  transition: transform 0.25s;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #ccc; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">都柏林租房<span>地图</span></div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="openPoiModal()">📍 设置常去地点</button>
+    <button class="btn btn-ghost btn-sm" onclick="openXhsModal()" style="color:#ff2442;border-color:rgba(255,36,66,0.35)">📋 解析小红书</button>
+    <button class="btn btn-primary" onclick="openAddModal()">＋ 添加房源</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" onclick="switchTab('list', this)">📋 房源列表</button>
+      <button class="sidebar-tab" onclick="switchTab('compare', this)">⚖️ 对比</button>
+      <button class="sidebar-tab" onclick="switchTab('settings', this)">⚙️ 设置</button>
+    </div>
+
+    <!-- LIST TAB -->
+    <div class="tab-panel active" id="tab-list">
+      <div class="listing-list" id="listing-list">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🏠</div>
+          <div class="empty-text">还没有房源<br>点右上角「添加房源」开始收集</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE TAB -->
+    <div class="tab-panel" id="tab-compare">
+      <div class="compare-panel">
+        <div class="compare-hint">勾选最多4个房源进行对比。租金、账单、通勤、设施一目了然。</div>
+        <div class="compare-select-list" id="compare-select-list"></div>
+        <button class="btn btn-primary btn-sm" onclick="renderCompareTable()" style="align-self:flex-start">生成对比表 →</button>
+        <div class="compare-table-wrap" id="compare-table-wrap" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="settings-panel">
+        <div>
+          <div class="settings-section-title">我的常去地点</div>
+          <div class="poi-list" id="poi-list">
+            <div style="font-size:12px;color:var(--muted);padding:8px 0">还没有设置常去地点</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          <div class="settings-section-title" style="margin-bottom:10px">API 设置</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <button class="btn btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="openApiKeyModal()">🔑 Claude Key</button>
+            <button class="btn btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="openGmapsKeyModal()">🗺 Google Maps Key</button>
+          </div>
+          <div id="gmaps-status" style="font-size:11px;margin-bottom:12px;color:var(--muted)"></div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          <div class="settings-section-title" style="margin-bottom:10px">数据管理</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="exportData()">📤 导出数据</button>
+            <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="document.getElementById('import-file').click()">📥 导入数据</button>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">数据保存在浏览器本地。换设备前请导出备份。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+</div>
+
+<!-- ────────────────── ADD/EDIT MODAL ────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">添加房源</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section-title">基本信息</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>房源名称 / 备注标题</label>
+          <input type="text" id="f-name" placeholder="如：Ranelagh单间" />
+        </div>
+        <div class="form-group">
+          <label>月租金 (€)</label>
+          <input type="number" id="f-rent" placeholder="1200" />
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div class="form-group">
+          <label>地址（越详细越好，用于地图定位）</label>
+          <input type="text" id="f-addr" placeholder="如：12 Ranelagh Road, Dublin 6" />
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">填完地址后点「定位」按钮在地图上确认位置</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>账单情况</label>
+          <select id="f-bills">
+            <option value="">未知</option>
+            <option value="included">全包（All bills included）</option>
+            <option value="partial">部分包（如水电）</option>
+            <option value="excluded">不包（自己交）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>房型</label>
+          <select id="f-type">
+            <option value="">未知</option>
+            <option value="single">单间（Single room）</option>
+            <option value="double">双人间（Double room）</option>
+            <option value="ensuite">独立卫浴（En suite）</option>
+            <option value="studio">开间（Studio）</option>
+            <option value="apartment">整套公寓</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">房屋细节</div>
+
+      <div class="form-group">
+        <label>设施（多选）</label>
+        <div class="checkbox-group" id="amenity-group">
+          <label class="checkbox-label"><input type="checkbox" value="ensuite"> 独立卫浴</label>
+          <label class="checkbox-label"><input type="checkbox" value="washing"> 洗衣机</label>
+          <label class="checkbox-label"><input type="checkbox" value="dryer"> 烘干机</label>
+          <label class="checkbox-label"><input type="checkbox" value="dishwasher"> 洗碗机</label>
+          <label class="checkbox-label"><input type="checkbox" value="parking"> 停车位</label>
+          <label class="checkbox-label"><input type="checkbox" value="garden"> 花园</label>
+          <label class="checkbox-label"><input type="checkbox" value="furnished"> 带家具</label>
+          <label class="checkbox-label"><input type="checkbox" value="pets"> 可养宠物</label>
+          <label class="checkbox-label"><input type="checkbox" value="couples"> 可情侣入住</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>可入住时间</label>
+          <input type="text" id="f-avail" placeholder="如：立即 / 2月1日" />
+        </div>
+        <div class="form-group">
+          <label>最短租期</label>
+          <input type="text" id="f-minlease" placeholder="如：6个月 / 不限" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>小红书帖子链接（选填，便于回溯）</label>
+        <input type="text" id="f-xhs" placeholder="https://www.xiaohongshu.com/..." />
+      </div>
+
+      <div class="form-group">
+        <label>个人备注</label>
+        <textarea id="f-note" placeholder="房东态度、看房印象、交通感受等..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>评分（1-5）</label>
+          <select id="f-rating">
+            <option value="">未评分</option>
+            <option value="5">⭐⭐⭐⭐⭐ 非常喜欢</option>
+            <option value="4">⭐⭐⭐⭐ 不错</option>
+            <option value="3">⭐⭐⭐ 一般</option>
+            <option value="2">⭐⭐ 不太满意</option>
+            <option value="1">⭐ 不考虑</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>状态</label>
+          <select id="f-status">
+            <option value="considering">考虑中</option>
+            <option value="contacted">已联系</option>
+            <option value="viewed">已看房</option>
+            <option value="applied">已申请</option>
+            <option value="rejected">已放弃</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="delete-btn" style="display:none; margin-right:auto" onclick="deleteListing()">删除</button>
+      <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveListing()">保存房源</button>
+    </div>
+  </div>
+</div>
+
+<!-- POI MODAL -->
+<div class="modal-overlay" id="poi-modal-overlay" onclick="handlePoiOverlayClick(event)">
+  <div class="modal" id="poi-modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">设置常去地点</div>
+      <button class="modal-close" onclick="closePoiModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">添加你的学校、实习地点等，工具会自动计算每个房源到这些地点的直线距离。</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>地点名称</label>
+          <input type="text" id="poi-name" placeholder="如：UCD / Google Dublin" />
+        </div>
+        <div class="form-group">
+          <label>地址</label>
+          <input type="text" id="poi-addr" placeholder="如：UCD, Belfield, Dublin 4" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addPoi()" style="align-self:flex-start">添加地点</button>
+      <div id="poi-modal-list" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="closePoiModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- XHS PARSE MODAL -->
+<div class="modal-overlay" id="xhs-modal-overlay" onclick="handleXhsOverlayClick(event)">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">📋 解析小红书帖子</div>
+      <button class="modal-close" onclick="closeXhsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+        ① 打开小红书帖子 &nbsp;→&nbsp; ② 复制全部文字内容 &nbsp;→&nbsp; ③ 粘贴到下方 &nbsp;→&nbsp; ④ 点解析
+      </div>
+      <div class="form-group">
+        <label>帖子文字内容</label>
+        <textarea id="xhs-text" style="min-height:160px" placeholder="把小红书帖子的文字全部复制粘贴到这里，包括标题、正文、地址等所有信息..."></textarea>
+      </div>
+      <div id="xhs-status" style="font-size:12px;color:var(--muted);display:none;align-items:center;gap:8px">
+        <span id="xhs-spinner" style="display:inline-block;animation:spin 1s linear infinite">⏳</span>
+        <span id="xhs-status-text">AI 解析中，请稍候...</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="margin-right:auto;background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px" onclick="openApiKeyModal()">🔑 API Key 设置</button>
+      <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="closeXhsModal()">取消</button>
+      <button class="btn btn-primary" id="xhs-parse-btn" onclick="parseXhs()">✨ AI 解析</button>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="apikey-modal-overlay" onclick="handleApikeyOverlayClick(event)">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">🔑 设置 Claude API Key</div>
+      <button class="modal-close" onclick="closeApiKeyModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">
+        Key 只保存在你自己的浏览器本地，不会上传到任何服务器。<br>
+        获取地址：<a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2)">console.anthropic.com</a> → API Keys
+      </div>
+      <div class="form-group">
+        <label>Anthropic API Key</label>
+        <input type="password" id="apikey-input" placeholder="sk-ant-api03-..." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="closeApiKeyModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- GOOGLE MAPS KEY MODAL -->
+<div class="modal-overlay" id="gmaps-modal-overlay" onclick="if(event.target===this)closeGmapsKeyModal()">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">🗺 设置 Google Maps API Key</div>
+      <button class="modal-close" onclick="closeGmapsKeyModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px">
+        Key 只保存在浏览器本地。设置后地图自动升级为 Google Maps，地址定位更准，并显示公交通勤时间。
+      </div>
+      <div class="form-group">
+        <label>Google Maps API Key</label>
+        <input type="password" id="gmaps-key-input" placeholder="AIzaSy..." />
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">
+        获取地址：<a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent2)">Google Cloud Console</a> → Credentials → Create API key<br>
+        需启用：Maps JavaScript API · Geocoding API · Distance Matrix API
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="clearGmapsKey()" style="margin-right:auto">清除 Key</button>
+      <button class="btn btn-ghost btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="closeGmapsKeyModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveGmapsKey()">保存并加载地图</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let listings = JSON.parse(localStorage.getItem('dublin_listings') || '[]');
+let pois     = JSON.parse(localStorage.getItem('dublin_pois')     || '[]');
+let editingId = null;
+let compareSelected = [];
+let map, markersLayer, poisLayer;
+
+const POI_COLORS = ['#2563eb','#7c3aed','#059669','#d97706','#db2777'];
+const STATUS_LABELS = { considering:'考虑中', contacted:'已联系', viewed:'已看房', applied:'已申请', rejected:'已放弃' };
+const STATUS_TAG    = { considering:'ctag-blue', contacted:'ctag-orange', viewed:'ctag-blue', applied:'ctag-green', rejected:'ctag-gray' };
+const BILLS_LABELS  = { included:'全包', partial:'部分包', excluded:'不包', '':'未知' };
+const BILLS_TAG     = { included:'ctag-green', partial:'ctag-orange', excluded:'ctag-red', '':'ctag-gray' };
+const AMENITY_NAMES = { ensuite:'独卫', washing:'洗衣机', dryer:'烘干机', dishwasher:'洗碗机', parking:'停车', garden:'花园', furnished:'有家具', pets:'可养宠物', couples:'可情侣' };
+
+// ════════════════════════════════════════
+//  MAP INIT
+// ════════════════════════════════════════
+let googleMapsLoaded = false;
+let gmap = null; // Google Maps instance (if active)
+
+function getGmapsKey() { return localStorage.getItem('google_maps_key') || ''; }
+
+function initMap() {
+  const key = getGmapsKey();
+  if (key) {
+    loadGoogleMaps(key);
+  } else {
+    initLeaflet();
+  }
+  updateGmapsStatus();
+}
+
+function initLeaflet() {
+  map = L.map('map', { zoomControl: false }).setView([53.3498, -6.2603], 12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO',
+    subdomains: 'abcd', maxZoom: 19
+  }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
+  poisLayer    = L.layerGroup().addTo(map);
+}
+
+function loadGoogleMaps(key) {
+  if (googleMapsLoaded) return;
+  googleMapsLoaded = true;
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=initGoogleMap`;
+  script.async = true;
+  script.onerror = () => {
+    showToast('Google Maps 加载失败，请检查 Key');
+    googleMapsLoaded = false;
+    initLeaflet();
+    renderMarkers();
+  };
+  document.head.appendChild(script);
+}
+
+window.initGoogleMap = function() {
+  // Google Maps loaded — replace map div with Google Maps
+  const mapDiv = document.getElementById('map');
+  gmap = new google.maps.Map(mapDiv, {
+    center: { lat: 53.3498, lng: -6.2603 },
+    zoom: 12,
+    disableDefaultUI: false,
+    zoomControl: true,
+    streetViewControl: false,
+    mapTypeControl: false,
+    styles: [
+      { featureType:'poi', elementType:'labels', stylers:[{visibility:'off'}] },
+      { featureType:'transit', elementType:'labels.icon', stylers:[{visibility:'off'}] }
+    ]
+  });
+
+  // Shim: keep markersLayer/poisLayer as arrays for Google Maps markers
+  markersLayer = { _layers: [], clearLayers() { this._layers.forEach(m=>m.setMap(null)); this._layers=[]; } };
+  poisLayer    = { _layers: [], clearLayers() { this._layers.forEach(m=>m.setMap(null)); this._layers=[]; } };
+
+  // Override flyTo for Google Maps
+  flyTo = function(l) {
+    if (l.lat && l.lng && gmap) gmap.panTo({lat:l.lat, lng:l.lng});
+  };
+
+  renderMarkers();
+  showToast('Google Maps 已加载 ✓');
+};
+
+// ════════════════════════════════════════
+//  GEOCODING — Google if key set, else Nominatim
+// ════════════════════════════════════════
+async function geocode(address) {
+  const key = getGmapsKey();
+  if (key) {
+    return geocodeGoogle(address, key);
+  }
+  return geocodeNominatim(address);
+}
+
+async function geocodeGoogle(address, key) {
+  const q = encodeURIComponent(address + ', Dublin, Ireland');
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${q}&key=${key}`;
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.status === 'OK' && d.results.length) {
+      const loc = d.results[0].geometry.location;
+      return { lat: loc.lat, lng: loc.lng };
+    }
+    if (d.status === 'REQUEST_DENIED') {
+      showToast('Google Maps Key 无效，已切换备用定位');
+      return geocodeNominatim(address);
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function geocodeNominatim(address) {
+  const q = encodeURIComponent(address + ', Dublin, Ireland');
+  const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+  try {
+    const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const d = await r.json();
+    if (d.length) return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon) };
+  } catch(e) {}
+  return null;
+}
+
+// ════════════════════════════════════════
+//  COMMUTE TIME (Google Distance Matrix)
+// ════════════════════════════════════════
+async function getCommuteTimes(listing) {
+  const key = getGmapsKey();
+  if (!key || !listing.lat || !pois.filter(p=>p.lat).length) return {};
+  const origin = `${listing.lat},${listing.lng}`;
+  const dests = pois.filter(p=>p.lat).map(p=>`${p.lat},${p.lng}`).join('|');
+  const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${encodeURIComponent(dests)}&mode=transit&key=${key}`;
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.status === 'OK' && d.rows.length) {
+      const results = {};
+      d.rows[0].elements.forEach((el, i) => {
+        if (el.status === 'OK') {
+          results[pois.filter(p=>p.lat)[i].id] = el.duration.text;
+        }
+      });
+      return results;
+    }
+  } catch(e) {}
+  return {};
+}
+
+// ════════════════════════════════════════
+//  DISTANCE (Haversine, km)
+// ════════════════════════════════════════
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ════════════════════════════════════════
+//  RENDER MAP MARKERS
+// ════════════════════════════════════════
+function renderMarkers() {
+  if (!markersLayer || !poisLayer) return;
+  markersLayer.clearLayers();
+  poisLayer.clearLayers();
+
+  if (gmap) {
+    // ── Google Maps markers ──
+    listings.forEach(l => {
+      if (!l.lat || !l.lng) return;
+      const markerEl = document.createElement('div');
+      markerEl.className = `marker-bubble${l.rating >= 4 ? ' accent' : ''}`;
+      markerEl.textContent = `€${l.rent||'?'}`;
+
+      const overlay = new google.maps.marker.AdvancedMarkerElement
+        ? (() => {
+            const m = new google.maps.marker.AdvancedMarkerElement({ position:{lat:l.lat,lng:l.lng}, map:gmap, content:markerEl });
+            m.addListener('click', () => {
+              highlightCard(l.id);
+              showGooglePopup(l);
+            });
+            return m;
+          })()
+        : (() => {
+            // Fallback: standard marker with info window
+            const m = new google.maps.Marker({ position:{lat:l.lat,lng:l.lng}, map:gmap,
+              label:{ text:`€${l.rent||'?'}`, color:'#fff', fontFamily:'Syne,sans-serif', fontWeight:'700', fontSize:'12px' },
+              icon:{ path:google.maps.SymbolPath.CIRCLE, scale:0, fillOpacity:0, strokeOpacity:0 }
+            });
+            const iw = new google.maps.InfoWindow({ content: buildPopupHTML(l) });
+            m.addListener('click', () => { iw.open(gmap, m); highlightCard(l.id); });
+            return m;
+          })();
+      markersLayer._layers.push(overlay);
+    });
+
+    pois.forEach((p, i) => {
+      if (!p.lat || !p.lng) return;
+      const color = POI_COLORS[i % POI_COLORS.length];
+      const el = document.createElement('div');
+      el.innerHTML = `<div class="marker-poi" style="background:${color}">${p.name}</div>`;
+      const m = new google.maps.Marker({
+        position:{lat:p.lat,lng:p.lng}, map:gmap,
+        title: p.addr,
+        icon:{ path:google.maps.SymbolPath.CIRCLE, scale:0, fillOpacity:0, strokeOpacity:0 }
+      });
+      poisLayer._layers.push(m);
+    });
+
+  } else {
+    // ── Leaflet markers (fallback) ──
+    listings.forEach(l => {
+      if (!l.lat || !l.lng) return;
+      const el = document.createElement('div');
+      el.innerHTML = `<div class="marker-bubble${l.rating >= 4 ? ' accent' : ''}">€${l.rent||'?'}</div>`;
+      const icon = L.divIcon({ html: el.innerHTML, className:'', iconAnchor:[0,0] });
+      const m = L.marker([l.lat, l.lng], { icon }).addTo(markersLayer);
+      m.bindPopup(buildPopupHTML(l), { maxWidth: 280, closeButton: false });
+      m.on('click', () => highlightCard(l.id));
+    });
+
+    pois.forEach((p, i) => {
+      if (!p.lat || !p.lng) return;
+      const color = POI_COLORS[i % POI_COLORS.length];
+      const el = document.createElement('div');
+      el.innerHTML = `<div class="marker-poi" style="background:${color}">${p.name}</div>`;
+      const icon = L.divIcon({ html: el.innerHTML, className:'', iconAnchor:[0,0] });
+      L.marker([p.lat, p.lng], { icon }).addTo(poisLayer)
+        .bindTooltip(p.addr, { direction:'top' });
+    });
+  }
+}
+
+let activeInfoWindow = null;
+function showGooglePopup(l) {
+  if (activeInfoWindow) activeInfoWindow.close();
+  const iw = new google.maps.InfoWindow({ content: buildPopupHTML(l), position:{lat:l.lat,lng:l.lng} });
+  iw.open(gmap);
+  activeInfoWindow = iw;
+}
+
+function buildPopupHTML(l) {
+  const bills = BILLS_LABELS[l.bills||''] || '未知';
+  const billsTag = BILLS_TAG[l.bills||''] || 'ctag-gray';
+  const amenities = (l.amenities||[]).map(a => `<span class="ctag ctag-gray">${AMENITY_NAMES[a]||a}</span>`).join('');
+  const dists = pois.filter(p=>p.lat).map(p=>{
+    const d = haversine(l.lat,l.lng,p.lat,p.lng);
+    return `<span style="font-size:11px;color:var(--muted)">📍${p.name}: ${d.toFixed(1)}km</span>`;
+  }).join(' &nbsp;');
+
+  return `<div class="popup-inner">
+    <div class="popup-name">${l.name||'未命名'}</div>
+    <div class="popup-price">€${l.rent||'?'}/月</div>
+    <div class="popup-addr">📍 ${l.addr||''}</div>
+    <div class="popup-tags">
+      <span class="ctag ${billsTag}">${bills}</span>
+      ${l.type ? `<span class="ctag ctag-blue">${l.type}</span>` : ''}
+      <span class="ctag ${STATUS_TAG[l.status]||'ctag-gray'}">${STATUS_LABELS[l.status]||''}</span>
+      ${amenities}
+    </div>
+    ${l.note ? `<div class="popup-note">"${l.note}"</div>` : ''}
+    ${dists ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${dists}</div>` : ''}
+    <div class="popup-actions">
+      <button class="btn btn-primary btn-sm" onclick="openEditModal('${l.id}')">编辑</button>
+      ${l.xhs ? `<a href="${l.xhs}" target="_blank" class="btn btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);text-decoration:none">小红书 ↗</a>` : ''}
+    </div>
+  </div>`;
+}
+
+function flyTo(l) {
+  if (l.lat && l.lng) map.flyTo([l.lat, l.lng], 15, { duration: 0.8 });
+}
+
+// ════════════════════════════════════════
+//  RENDER SIDEBAR LIST
+// ════════════════════════════════════════
+function renderList() {
+  const container = document.getElementById('listing-list');
+  const empty = document.getElementById('empty-state');
+
+  if (!listings.length) {
+    empty.style.display = 'flex';
+    container.querySelectorAll('.listing-card').forEach(c => c.remove());
+    return;
+  }
+  empty.style.display = 'none';
+  container.querySelectorAll('.listing-card').forEach(c => c.remove());
+
+  listings.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'listing-card';
+    card.id = `card-${l.id}`;
+
+    const distHtml = pois.filter(p=>p.lat&&l.lat).map(p=>{
+      const d = haversine(l.lat,l.lng,p.lat,p.lng);
+      return `<span>📍${p.name} ${d.toFixed(1)}km</span>`;
+    }).join(' ');
+
+    const amenities = (l.amenities||[]).slice(0,3).map(a => `<span class="ctag ctag-gray">${AMENITY_NAMES[a]||a}</span>`).join('');
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-name">${l.name||'未命名房源'}</div>
+        <div class="card-price">€${l.rent||'?'}</div>
+      </div>
+      <div class="card-addr">📍 ${l.addr||'地址未填'}</div>
+      <div class="card-tags">
+        <span class="ctag ${BILLS_TAG[l.bills||'']}"> ${BILLS_LABELS[l.bills||'']}</span>
+        ${l.type ? `<span class="ctag ctag-blue">${l.type}</span>` : ''}
+        <span class="ctag ${STATUS_TAG[l.status]||'ctag-gray'}">${STATUS_LABELS[l.status]||''}</span>
+        ${amenities}
+        ${l.rating ? `<span class="ctag ctag-orange">${'⭐'.repeat(l.rating)}</span>` : ''}
+      </div>
+      ${distHtml ? `<div class="card-dist">${distHtml}</div>` : ''}
+      <div class="card-actions">
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="flyTo(${JSON.stringify({lat:l.lat,lng:l.lng})})">🗺 地图</button>
+        <button class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border)" onclick="openEditModal('${l.id}')">✏️ 编辑</button>
+        ${l.xhs ? `<a href="${l.xhs}" target="_blank" class="btn btn-sm" style="background:var(--surface2);border:1px solid var(--border);text-decoration:none;color:var(--text)">🔗 原帖</a>` : ''}
+      </div>
+    `;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('button,a')) return;
+      flyTo(l);
+      highlightCard(l.id);
+    });
+    container.appendChild(card);
+  });
+
+  renderCompareSelectList();
+}
+
+function highlightCard(id) {
+  document.querySelectorAll('.listing-card').forEach(c => c.classList.remove('active'));
+  const c = document.getElementById(`card-${id}`);
+  if (c) { c.classList.add('active'); c.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+// ════════════════════════════════════════
+//  COMPARE
+// ════════════════════════════════════════
+function renderCompareSelectList() {
+  const el = document.getElementById('compare-select-list');
+  el.innerHTML = '';
+  listings.forEach(l => {
+    const item = document.createElement('div');
+    item.className = 'compare-item' + (compareSelected.includes(l.id) ? ' selected' : '');
+    item.innerHTML = `<input type="checkbox" ${compareSelected.includes(l.id)?'checked':''} onchange="toggleCompare('${l.id}', this)">
+      <span style="flex:1">${l.name||'未命名'}</span>
+      <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700">€${l.rent||'?'}</span>`;
+    el.appendChild(item);
+  });
+}
+
+function toggleCompare(id, cb) {
+  if (cb.checked) {
+    if (compareSelected.length >= 4) { cb.checked = false; showToast('最多对比4个房源'); return; }
+    compareSelected.push(id);
+  } else {
+    compareSelected = compareSelected.filter(x => x !== id);
+  }
+  renderCompareSelectList();
+  document.getElementById('compare-table-wrap').style.display = 'none';
+}
+
+function renderCompareTable() {
+  if (compareSelected.length < 2) { showToast('请至少选择2个房源'); return; }
+  const selected = listings.filter(l => compareSelected.includes(l.id));
+  const wrap = document.getElementById('compare-table-wrap');
+  wrap.style.display = 'block';
+
+  const rents = selected.map(l => l.rent || Infinity);
+  const minRent = Math.min(...rents);
+  const maxRent = Math.max(...rents);
+
+  const rows = [
+    ['月租', l => `€${l.rent||'?'}`, l => l.rent === minRent ? 'compare-best' : (l.rent === maxRent ? 'compare-worst' : '')],
+    ['账单', l => BILLS_LABELS[l.bills||''] || '未知', l => l.bills === 'included' ? 'compare-best' : ''],
+    ['房型', l => l.type||'未知', ()=>''],
+    ['独卫', l => (l.amenities||[]).includes('ensuite') ? '✅' : '❌', l => (l.amenities||[]).includes('ensuite') ? 'compare-best' : ''],
+    ['洗衣', l => (l.amenities||[]).includes('washing') ? '✅' : '❌', ()=>''],
+    ['家具', l => (l.amenities||[]).includes('furnished') ? '✅' : '❌', ()=>''],
+    ['状态', l => STATUS_LABELS[l.status]||'', ()=>''],
+    ['评分', l => l.rating ? '⭐'.repeat(l.rating) : '—', l => {
+      const max = Math.max(...selected.map(s=>s.rating||0));
+      return (l.rating||0) === max && max > 0 ? 'compare-best' : '';
+    }],
+    ...pois.filter(p=>p.lat).map(p => [
+      p.name,
+      l => l.lat ? haversine(l.lat,l.lng,p.lat,p.lng).toFixed(1)+'km' : '未定位',
+      l => {
+        if (!l.lat) return '';
+        const dists = selected.filter(s=>s.lat).map(s=>haversine(s.lat,s.lng,p.lat,p.lng));
+        const d = haversine(l.lat,l.lng,p.lat,p.lng);
+        return d === Math.min(...dists) ? 'compare-best' : (d === Math.max(...dists) ? 'compare-worst' : '');
+      }
+    ])
+  ];
+
+  let html = '<table class="compare-table"><thead><tr><th class="col-label">项目</th>';
+  selected.forEach(l => { html += `<th>${l.name||'未命名'}</th>`; });
+  html += '</tr></thead><tbody>';
+  rows.forEach(([label, getValue, getClass]) => {
+    html += `<tr><td class="col-label">${label}</td>`;
+    selected.forEach(l => { html += `<td class="${getClass(l)}">${getValue(l)}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ════════════════════════════════════════
+//  ADD / EDIT MODAL
+// ════════════════════════════════════════
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '添加房源';
+  document.getElementById('delete-btn').style.display = 'none';
+  clearForm();
+  openModal('modal-overlay');
+}
+
+function openEditModal(id) {
+  const l = listings.find(x => x.id === id);
+  if (!l) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = '编辑房源';
+  document.getElementById('delete-btn').style.display = 'inline-flex';
+  fillForm(l);
+  openModal('modal-overlay');
+  map.closePopup();
+}
+
+function clearForm() {
+  ['f-name','f-rent','f-addr','f-avail','f-minlease','f-xhs','f-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-bills').value = '';
+  document.getElementById('f-type').value = '';
+  document.getElementById('f-rating').value = '';
+  document.getElementById('f-status').value = 'considering';
+  document.querySelectorAll('#amenity-group input[type=checkbox]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.checkbox-label').classList.remove('checked');
+  });
+}
+
+function fillForm(l) {
+  document.getElementById('f-name').value     = l.name || '';
+  document.getElementById('f-rent').value     = l.rent || '';
+  document.getElementById('f-addr').value     = l.addr || '';
+  document.getElementById('f-bills').value    = l.bills || '';
+  document.getElementById('f-type').value     = l.type || '';
+  document.getElementById('f-avail').value    = l.avail || '';
+  document.getElementById('f-minlease').value = l.minlease || '';
+  document.getElementById('f-xhs').value      = l.xhs || '';
+  document.getElementById('f-note').value     = l.note || '';
+  document.getElementById('f-rating').value   = l.rating || '';
+  document.getElementById('f-status').value   = l.status || 'considering';
+  document.querySelectorAll('#amenity-group input[type=checkbox]').forEach(cb => {
+    cb.checked = (l.amenities||[]).includes(cb.value);
+    cb.closest('.checkbox-label').classList.toggle('checked', cb.checked);
+  });
+}
+
+async function saveListing() {
+  const name    = document.getElementById('f-name').value.trim();
+  const rent    = parseFloat(document.getElementById('f-rent').value) || null;
+  const addr    = document.getElementById('f-addr').value.trim();
+  const bills   = document.getElementById('f-bills').value;
+  const type    = document.getElementById('f-type').value;
+  const avail   = document.getElementById('f-avail').value.trim();
+  const minlease= document.getElementById('f-minlease').value.trim();
+  const xhs     = document.getElementById('f-xhs').value.trim();
+  const note    = document.getElementById('f-note').value.trim();
+  const rating  = parseInt(document.getElementById('f-rating').value) || null;
+  const status  = document.getElementById('f-status').value;
+  const amenities = [...document.querySelectorAll('#amenity-group input:checked')].map(cb => cb.value);
+
+  if (!addr) { showToast('请填写地址'); return; }
+
+  const saveBtn = document.querySelector('.modal-footer .btn-primary');
+  saveBtn.textContent = '定位中...';
+  saveBtn.disabled = true;
+
+  let lat = null, lng = null;
+
+  if (editingId) {
+    const existing = listings.find(l => l.id === editingId);
+    if (existing && existing.addr === addr) { lat = existing.lat; lng = existing.lng; }
+  }
+
+  if (!lat) {
+    const coords = await geocode(addr);
+    if (coords) { lat = coords.lat; lng = coords.lng; }
+    else { showToast('地址定位失败，已保存但无法在地图显示。可稍后重试。'); }
+  }
+
+  if (editingId) {
+    const idx = listings.findIndex(l => l.id === editingId);
+    listings[idx] = { ...listings[idx], name, rent, addr, bills, type, avail, minlease, xhs, note, rating, status, amenities, lat, lng };
+  } else {
+    listings.push({ id: Date.now().toString(), name, rent, addr, bills, type, avail, minlease, xhs, note, rating, status, amenities, lat, lng });
+  }
+
+  save();
+  saveBtn.textContent = '保存房源';
+  saveBtn.disabled = false;
+  closeModal();
+  showToast(editingId ? '已更新 ✓' : '已添加 ✓');
+}
+
+function deleteListing() {
+  if (!editingId) return;
+  if (!confirm('确定删除这个房源？')) return;
+  listings = listings.filter(l => l.id !== editingId);
+  compareSelected = compareSelected.filter(id => id !== editingId);
+  save();
+  closeModal();
+  showToast('已删除');
+}
+
+// ════════════════════════════════════════
+//  POI MODAL
+// ════════════════════════════════════════
+function openPoiModal() {
+  renderPoiModalList();
+  openModal('poi-modal-overlay');
+}
+
+function closePoiModal() { closeModalById('poi-modal-overlay'); }
+
+function handlePoiOverlayClick(e) {
+  if (e.target === document.getElementById('poi-modal-overlay')) closePoiModal();
+}
+
+async function addPoi() {
+  const name = document.getElementById('poi-name').value.trim();
+  const addr = document.getElementById('poi-addr').value.trim();
+  if (!name || !addr) { showToast('请填写地点名称和地址'); return; }
+
+  const btn = document.querySelector('#poi-modal .btn-primary');
+  btn.textContent = '定位中...'; btn.disabled = true;
+
+  const coords = await geocode(addr);
+  pois.push({ id: Date.now().toString(), name, addr, lat: coords?.lat||null, lng: coords?.lng||null });
+  savePois();
+  document.getElementById('poi-name').value = '';
+  document.getElementById('poi-addr').value = '';
+  btn.textContent = '添加地点'; btn.disabled = false;
+  renderPoiModalList();
+  renderList();
+  renderMarkers();
+  showToast('地点已添加 ✓');
+}
+
+function removePoi(id) {
+  pois = pois.filter(p => p.id !== id);
+  savePois();
+  renderPoiModalList();
+  renderList();
+  renderMarkers();
+}
+
+function renderPoiModalList() {
+  const el = document.getElementById('poi-modal-list');
+  el.innerHTML = '';
+  pois.forEach((p, i) => {
+    const color = POI_COLORS[i % POI_COLORS.length];
+    const item = document.createElement('div');
+    item.className = 'poi-item';
+    item.innerHTML = `<div class="poi-dot" style="background:${color}"></div>
+      <div style="flex:1"><div class="poi-name">${p.name}</div><div class="poi-addr">${p.addr}</div></div>
+      <button class="poi-remove" onclick="removePoi('${p.id}')">✕</button>`;
+    el.appendChild(item);
+  });
+  renderSettingsPOIList();
+}
+
+function renderSettingsPOIList() {
+  const el = document.getElementById('poi-list');
+  if (!pois.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">还没有设置常去地点</div>';
+    return;
+  }
+  el.innerHTML = '';
+  pois.forEach((p, i) => {
+    const color = POI_COLORS[i % POI_COLORS.length];
+    const item = document.createElement('div');
+    item.className = 'poi-item';
+    item.innerHTML = `<div class="poi-dot" style="background:${color}"></div>
+      <div style="flex:1"><div class="poi-name">${p.name}</div><div class="poi-addr">${p.addr}</div></div>
+      <button class="poi-remove" onclick="removePoi('${p.id}')">✕</button>`;
+    el.appendChild(item);
+  });
+}
+
+// ════════════════════════════════════════
+//  MODAL HELPERS
+// ════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModalById(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal() { closeModalById('modal-overlay'); }
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+// Checkbox toggle styling
+document.addEventListener('change', e => {
+  if (e.target.type === 'checkbox' && e.target.closest('#amenity-group')) {
+    e.target.closest('.checkbox-label').classList.toggle('checked', e.target.checked);
+  }
+});
+
+// ════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name === 'compare') renderCompareSelectList();
+  if (name === 'settings') renderSettingsPOIList();
+}
+
+// ════════════════════════════════════════
+//  PERSIST
+// ════════════════════════════════════════
+function save() {
+  localStorage.setItem('dublin_listings', JSON.stringify(listings));
+  renderList();
+  renderMarkers();
+}
+
+function savePois() {
+  localStorage.setItem('dublin_pois', JSON.stringify(pois));
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify({ listings, pois }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dublin_rentals_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast('已导出 ✓');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.listings) listings = d.listings;
+      if (d.pois) pois = d.pois;
+      localStorage.setItem('dublin_listings', JSON.stringify(listings));
+      localStorage.setItem('dublin_pois', JSON.stringify(pois));
+      save();
+      renderSettingsPOIList();
+      showToast(`已导入 ${listings.length} 个房源 ✓`);
+    } catch { showToast('文件格式错误'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+
+// ════════════════════════════════════════
+//  API KEY
+// ════════════════════════════════════════
+function getApiKey() { return localStorage.getItem('claude_api_key') || ''; }
+
+function openApiKeyModal() {
+  document.getElementById('apikey-input').value = getApiKey();
+  openModal('apikey-modal-overlay');
+}
+function closeApiKeyModal() { closeModalById('apikey-modal-overlay'); }
+function handleApikeyOverlayClick(e) {
+  if (e.target === document.getElementById('apikey-modal-overlay')) closeApiKeyModal();
+}
+function saveApiKey() {
+  const k = document.getElementById('apikey-input').value.trim();
+  if (!k.startsWith('sk-ant-')) { showToast('Key 格式不对，应以 sk-ant- 开头'); return; }
+  localStorage.setItem('claude_api_key', k);
+  closeApiKeyModal();
+  showToast('API Key 已保存 ✓');
+}
+
+// ════════════════════════════════════════
+//  XHS PARSE
+// ════════════════════════════════════════
+function openXhsModal() {
+  if (!getApiKey()) {
+    openApiKeyModal();
+    showToast('请先设置 Claude API Key');
+    return;
+  }
+  document.getElementById('xhs-text').value = '';
+  document.getElementById('xhs-status').style.display = 'none';
+  openModal('xhs-modal-overlay');
+}
+function closeXhsModal() { closeModalById('xhs-modal-overlay'); }
+function handleXhsOverlayClick(e) {
+  if (e.target === document.getElementById('xhs-modal-overlay')) closeXhsModal();
+}
+
+async function parseXhs() {
+  const text = document.getElementById('xhs-text').value.trim();
+  if (!text) { showToast('请先粘贴帖子内容'); return; }
+
+  const key = getApiKey();
+  if (!key) { openApiKeyModal(); return; }
+
+  const btn = document.getElementById('xhs-parse-btn');
+  const statusEl = document.getElementById('xhs-status');
+  const statusText = document.getElementById('xhs-status-text');
+
+  btn.disabled = true;
+  btn.textContent = '解析中...';
+  statusEl.style.display = 'flex';
+  statusText.textContent = 'AI 解析中，请稍候...';
+
+  const prompt = `你是一个帮助中国留学生在都柏林找租房的助手。
+从以下小红书帖子文字中提取租房信息，返回纯 JSON，不要任何多余文字。
+
+帖子内容：
+${text}
+
+请返回如下格式的 JSON（没有信息的字段留空字符串，amenities 返回数组）：
+{
+  "name": "房源简短标题（如 Ranelagh双人间）",
+  "rent": 数字或null,
+  "addr": "完整地址（尽量包含街道名和都柏林区号）",
+  "bills": "included 或 partial 或 excluded 或 空字符串",
+  "type": "single 或 double 或 ensuite 或 studio 或 apartment 或 空字符串",
+  "avail": "可入住时间",
+  "minlease": "最短租期",
+  "xhs": "帖子链接（如文中有）",
+  "note": "其他重要信息（朝向、房东联系方式、特别条件等）",
+  "amenities": ["ensuite","washing","dryer","dishwasher","parking","garden","furnished","pets","couples"] 中符合的项
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+
+    // Strip markdown code fences if present
+    const jsonStr = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/,'').trim();
+    const parsed = JSON.parse(jsonStr);
+
+    statusText.textContent = '解析成功！正在填入表单...';
+
+    // Close XHS modal, open add modal with pre-filled data
+    setTimeout(() => {
+      closeXhsModal();
+      openAddModal();
+      // Fill form fields
+      if (parsed.name)     document.getElementById('f-name').value     = parsed.name;
+      if (parsed.rent)     document.getElementById('f-rent').value     = parsed.rent;
+      if (parsed.addr)     document.getElementById('f-addr').value     = parsed.addr;
+      if (parsed.bills)    document.getElementById('f-bills').value    = parsed.bills;
+      if (parsed.type)     document.getElementById('f-type').value     = parsed.type;
+      if (parsed.avail)    document.getElementById('f-avail').value    = parsed.avail;
+      if (parsed.minlease) document.getElementById('f-minlease').value = parsed.minlease;
+      if (parsed.xhs)      document.getElementById('f-xhs').value      = parsed.xhs;
+      if (parsed.note)     document.getElementById('f-note').value     = parsed.note;
+      // Amenities
+      if (Array.isArray(parsed.amenities)) {
+        document.querySelectorAll('#amenity-group input[type=checkbox]').forEach(cb => {
+          cb.checked = parsed.amenities.includes(cb.value);
+          cb.closest('.checkbox-label').classList.toggle('checked', cb.checked);
+        });
+      }
+      showToast('已自动填入，请确认后保存 ✓');
+    }, 600);
+
+  } catch(e) {
+    statusText.textContent = '解析失败：' + e.message;
+    showToast('解析失败，请检查 API Key 或网络');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ AI 解析';
+  }
+}
+
+
+// ════════════════════════════════════════
+//  GOOGLE MAPS KEY MANAGEMENT
+// ════════════════════════════════════════
+function openGmapsKeyModal() {
+  document.getElementById('gmaps-key-input').value = getGmapsKey();
+  openModal('gmaps-modal-overlay');
+}
+function closeGmapsKeyModal() { closeModalById('gmaps-modal-overlay'); }
+
+function saveGmapsKey() {
+  const k = document.getElementById('gmaps-key-input').value.trim();
+  if (!k) { showToast('请输入 Key'); return; }
+  localStorage.setItem('google_maps_key', k);
+  closeGmapsKeyModal();
+  updateGmapsStatus();
+  // Reload page to reinitialise map with new key
+  showToast('已保存，正在重新加载地图...');
+  setTimeout(() => location.reload(), 800);
+}
+
+function clearGmapsKey() {
+  localStorage.removeItem('google_maps_key');
+  closeGmapsKeyModal();
+  updateGmapsStatus();
+  showToast('Google Maps Key 已清除，刷新后使用备用地图');
+}
+
+function updateGmapsStatus() {
+  const el = document.getElementById('gmaps-status');
+  if (!el) return;
+  const key = getGmapsKey();
+  el.textContent = key ? '✅ Google Maps 已启用' : '⚠️ 未设置 — 使用免费备用地图';
+  el.style.color = key ? 'var(--good)' : 'var(--muted)';
+}
+
+// ════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════
+initMap();
+renderList();
+renderMarkers();
+renderSettingsPOIList();
+</script>
+</body>
+</html>
