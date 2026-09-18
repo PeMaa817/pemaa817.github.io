@@ -115,8 +115,7 @@
       </p>
       <div class="hero-links">
         <a href="#work" class="btn btn-primary" data-i18n="hero.cta">View Work ↓</a>
-        <a href="https://www.linkedin.com/in/yangzong-baima" target="_blank" class="btn btn-ghost" data-i18n="hero.linkedin">LinkedIn ↗</a>
-        <a href="mailto:pemayangzom817@gmail.com" class="btn btn-ghost" data-i18n="hero.email">Email ↗</a>
+        <a href="#contact" class="btn btn-ghost" data-i18n="hero.contact">Contact ↓</a>
       </div>
     </div>
   </div>
@@ -133,7 +132,7 @@
         <div class="group-label" data-i18n="work.group.capstone">Capstone Projects</div>
         <div class="group-stack">
 
-          <a href="painscape/index.html" class="project-card">
+          <a href="painscape/PainScape_Portfolio.pdf" target="_blank" class="project-card">
             <div class="project-index">01</div>
             <div class="project-body">
               <div class="project-tags">
@@ -144,12 +143,9 @@
               </div>
               <h3 class="project-title" data-i18n="p.painscape.title">PainScape — Chronic Pain Community Workshop Toolkit</h3>
               <p class="project-desc" data-i18n="p.painscape.desc">Placeholder</p>
-              <div class="project-extra">
-                <a href="painscape/PainScape_Portfolio.pdf" data-i18n="p.painscape.pdf">Read the capstone report (PDF) ↓</a>
-              </div>
               <div class="project-foot">
-                <span class="project-year">2025–2026</span>
-                <span class="project-status" data-i18n="p.painscape.status">Live ↗</span>
+                <span class="project-year">2026.05–2026.08</span>
+                <span class="project-status" data-i18n="p.painscape.status">PDF ↓</span>
               </div>
             </div>
           </a>
@@ -184,7 +180,7 @@
             <div class="project-body">
               <div class="project-tags">
                 <span class="tag highlight" data-i18n="p.cso.tag1">Data Visualisation</span>
-                <span class="tag blue">Vega-Lite</span>
+                <span class="tag blue" data-i18n="p.cso.tag2">Interactive Dashboard</span>
                 <span class="tag" data-i18n="p.cso.tag3">Policy Analysis</span>
                 <span class="tag" data-i18n="p.cso.tag4">UCD · HCI</span>
               </div>
@@ -251,6 +247,10 @@
         </p>
       </div>
       <div class="contact-links">
+        <a href="tel:+8618989912180" class="contact-item">
+          <span class="contact-item-label" data-i18n="contact.phone">Phone</span>
+          189 8991 2180
+        </a>
         <a href="mailto:pemayangzom817@gmail.com" class="contact-item">
           <span class="contact-item-label" data-i18n="contact.email">Email</span>
           pemayangzom817@gmail.com
@@ -259,9 +259,9 @@
           <span class="contact-item-label">LinkedIn</span>
           linkedin.com/in/yangzong-baima
         </a>
-        <a href="https://github.com/PeMaa817" target="_blank" class="contact-item">
-          <span class="contact-item-label">GitHub</span>
-          github.com/PeMaa817
+        <a href="#" class="contact-item" data-boss-placeholder="true">
+          <span class="contact-item-label" data-i18n="contact.boss">BOSS直聘</span>
+          <span data-i18n="contact.bossHint">链接待补充 / link coming soon</span>
         </a>
         <a href="YangzongBaima_CV_ZH.pdf" class="contact-item">
           <span class="contact-item-label" data-i18n="contact.cvzh">CV (中文)</span>
@@ -287,27 +287,26 @@ const translations = {
     "nav.work": "Work",
     "nav.contact": "Contact",
     "hero.label": "BEng Civil Engineering · MSc HCI",
-    "hero.name": "Yangzong<br><em>Baima</em>",
+    "hero.name": "Yangzong <em>Baima</em>",
     "hero.bio": "<strong>Tongji University</strong> Civil Engineering graduate, now completing an <strong>MSc in Human-Computer Interaction at UCD Dublin</strong>. I work across data-driven policy design, AI product prototyping, and accessibility-focused research — grounded in a trilingual (Tibetan / Mandarin / English) perspective on underserved user groups.",
     "hero.cta": "View Work ↓",
-    "hero.linkedin": "LinkedIn ↗",
-    "hero.email": "Email ↗",
+    "hero.contact": "Contact ↓",
     "work.title": "Selected Work",
     "work.group.capstone": "Capstone Projects",
     "work.group.personal": "Personal Projects",
     "p.painscape.tag1": "UX Research",
     "p.painscape.tag2": "Community Toolkit",
-    "p.painscape.tag3": "GDPR / Ethics",
+    "p.painscape.tag3": "Qualitative Research",
     "p.painscape.tag4": "UCD · Capstone",
     "p.painscape.title": "PainScape — Chronic Pain Community Workshop Toolkit",
-    "p.painscape.desc": "UCD MSc HCI capstone project. Built on qualitative interviews and a literature review (Harding et al., 2026: only 13% of chronic pain apps offer social support), designed a community workshop toolkit for people with chronic pain — the core insight is that patients need to be heard outside a clinical framework. Independently led ethics approval, a Reddit survey deployment, and quantitative analysis; co-led NVivo qualitative coding with the team. Designed a full risk-management framework (participant handbook, facilitator handbook, five-tier consent structure, four appendices) and shipped a GDPR-compliant consent flow on the project site. Individual portfolio grade: 87.5/100 (55% of the capstone module grade).",
-    "p.painscape.pdf": "Read the capstone report (PDF) ↓",
-    "p.painscape.status": "Live ↗",
+    "p.painscape.desc": "UCD MSc HCI capstone, built with a European chronic pain community. The core problem: low engagement within the patient community and members reluctant to speak up. Combined a survey, workshops, and a literature review, then ran qualitative and quantitative analysis on the questionnaire and interview data. The toolkit went through two rounds of iteration and landed as an offline kit used for the community's recurring recruitment events. It was well received, and next steps toward real-world deployment are being discussed with the supervisor and project partners.",
+    "p.painscape.status": "PDF ↓",
     "p.cso.tag1": "Data Visualisation",
+    "p.cso.tag2": "Interactive Dashboard",
     "p.cso.tag3": "Policy Analysis",
     "p.cso.tag4": "UCD · HCI",
     "p.cso.title": "Energy Vulnerability Dashboard",
-    "p.cso.desc": "Started as an exploratory dashboard on Irish Central Statistics Office (CSO) census data — demoed live to 20+ staff at CSO headquarters — then iterated into a county-level \"Energy Vulnerability Index\" for policy targeting. The core insight: no single indicator (e.g. \"low income\") captures the real hardship faced by older people living alone. Combined rates of solo-living seniors, median income, and income inequality (Q1/Q3 ratio) into a weighted Vega-Lite index. Shipped an interactive dashboard with a national vulnerability map, an income-vs-vulnerability comparison chart, and a policy-intervention matrix splitting Ireland's 26 counties into four quadrants. Result: 7 of 26 counties (~27%) fall into the \"high vulnerability / low structural efficiency\" priority quadrant, giving local authorities a ready-made resourcing priority list.",
+    "p.cso.desc": "Started as an exploratory dashboard on Irish Central Statistics Office (CSO) census data — demoed live at CSO headquarters — then iterated into a county-level \"Energy Vulnerability Index\" for policy targeting. The core insight: no single indicator (e.g. \"low income\") captures the real hardship faced by older people living alone. Combined rates of solo-living seniors, median income, and income inequality (Q1/Q3 ratio) into a weighted index. Shipped an interactive dashboard with a national vulnerability map, an income-vs-vulnerability comparison chart, and a policy-intervention matrix splitting Ireland's 26 counties into four quadrants. Result: 7 of 26 counties (~27%) fall into the \"high vulnerability / low structural efficiency\" priority quadrant, giving local authorities a ready-made resourcing priority list.",
     "p.cso.status": "Live ↗",
     "p.rental.tag1": "Product Tool",
     "p.rental.title": "Dublin Rental Research Engine",
@@ -327,7 +326,10 @@ const translations = {
     "p.pit.status": "Case Study ↗",
     "contact.title": "Get in Touch",
     "contact.blurb": "Actively looking for full-time Product Manager roles — AI product / accessibility & eldercare tech — in China, and available to start as soon as I graduate in August 2026.",
+    "contact.phone": "Phone",
     "contact.email": "Email",
+    "contact.boss": "BOSS Zhipin",
+    "contact.bossHint": "Link coming soon",
     "contact.cvzh": "CV (中文)",
     "contact.cven": "CV (English)",
     "contact.download": "Download PDF ↓",
@@ -339,27 +341,26 @@ const translations = {
     "nav.work": "作品",
     "nav.contact": "联系方式",
     "hero.label": "土木工程学士 · 人机交互硕士",
-    "hero.name": "白玛<br><em>央宗</em>",
+    "hero.name": "白玛 <em>央宗</em>",
     "hero.bio": "同济大学土木工程学士，目前在爱尔兰都柏林大学（UCD）攻读人机交互（HCI）硕士。工作横跨数据驱动的政策设计、AI产品原型搭建与无障碍/适老化方向的研究，藏、汉、英三语背景带来对少数语言社区与多元用户群体的天然洞察。",
     "hero.cta": "查看作品 ↓",
-    "hero.linkedin": "LinkedIn ↗",
-    "hero.email": "邮箱 ↗",
+    "hero.contact": "联系方式 ↓",
     "work.title": "精选项目",
     "work.group.capstone": "毕业设计",
     "work.group.personal": "个人项目",
     "p.painscape.tag1": "用户研究",
     "p.painscape.tag2": "社区工具包",
-    "p.painscape.tag3": "GDPR / 伦理",
+    "p.painscape.tag3": "质性研究",
     "p.painscape.tag4": "UCD · 毕业设计",
     "p.painscape.title": "PainScape —— 慢性疼痛社区工作坊工具包",
-    "p.painscape.desc": "UCD人机交互硕士毕业设计。基于质性访谈与文献研究（Harding et al., 2026：仅13%的慢性疼痛类App具备社交支持功能），设计面向慢性疼痛人群的社区工作坊工具包，核心洞察是患者需要在临床框架之外被听见、被理解的空间。独立完成伦理审批、Reddit问卷调研部署与定量分析，并与团队共同完成NVivo质性编码。独立设计完整的风险管理体系（参与者手册、引导者手册、五层同意结构、四个附录），并在项目网站上实现了符合GDPR的同意与隐私机制。个人作品集评分87.5/100（占毕业设计模块总成绩55%）。",
-    "p.painscape.pdf": "查看毕业设计完整报告（PDF）↓",
-    "p.painscape.status": "已上线 ↗",
+    "p.painscape.desc": "UCD人机交互硕士毕业设计，与欧洲慢性疼痛社区合作。核心问题是患者社群内部活跃度低、参与意愿弱，社区成员表达意愿低。通过设计并分发问卷，结合工作坊与文献研读，对问卷与访谈数据做定性与定量分析。方案经过两轮迭代，最终确定为一套用于社群定期招新活动的线下工具包。项目获得积极评价，目前正与导师和项目伙伴商谈推进实际部署的下一步。",
+    "p.painscape.status": "PDF ↓",
     "p.cso.tag1": "数据可视化",
+    "p.cso.tag2": "交互式仪表盘",
     "p.cso.tag3": "政策分析",
     "p.cso.tag4": "UCD · 人机交互",
-    "p.cso.title": "独居老人能源贫困精准扶持-可视化看板",
-    "p.cso.desc": "从一版基于爱尔兰国家统计局（CSO）人口普查数据的探索性可视化仪表盘起步——曾在CSO总部向20余名工作人员现场演示——后迭代为一套面向政策应用场景的郡级\"能源脆弱性指数\"模型，核心洞察是单一指标（如\"低收入\"）无法捕捉老年独居人群真实的生活困境。整合独居老人比例与数量、收入中位数、收入不均等指标，使用Vega-Lite构建加权公式量化各郡风险，并上线交互式仪表盘，包含全国郡级脆弱性分布地图、收入-脆弱性对比图，以及将26个郡按经济脆弱性与结构效率划分为四象限的\"政策干预矩阵\"。结果：26个郡中有7个（约27%）落入\"高脆弱性/低结构效率\"的优先干预象限，为地方政府提供可直接落地的资源分配优先级排序。",
+    "p.cso.title": "能源脆弱性可视化看板",
+    "p.cso.desc": "从一版基于爱尔兰国家统计局（CSO）人口普查数据的探索性可视化仪表盘起步——曾在CSO总部现场演示——后迭代为一套面向政策应用场景的郡级\"能源脆弱性指数\"模型，核心洞察是单一指标（如\"低收入\"）无法捕捉老年独居人群真实的生活困境。整合独居老人比例与数量、收入中位数、收入不均等指标，构建加权公式量化各郡风险，并上线交互式仪表盘，包含全国郡级脆弱性分布地图、收入-脆弱性对比图，以及将26个郡按经济脆弱性与结构效率划分为四象限的\"政策干预矩阵\"。结果：26个郡中有7个（约27%）落入\"高脆弱性/低结构效率\"的优先干预象限，为地方政府提供可直接落地的资源分配优先级排序。",
     "p.cso.status": "已上线 ↗",
     "p.rental.tag1": "产品工具",
     "p.rental.title": "都柏林租房调研引擎",
@@ -368,7 +369,7 @@ const translations = {
     "p.shengshui.tag1": "Chrome插件",
     "p.shengshui.tag2": "可持续",
     "p.shengshui.tag3": "AI透明化",
-    "p.shengshui.title": "AI能耗/水耗透明化浏览器插件",
+    "p.shengshui.title": "省水小碗 —— AI能耗/水耗透明化浏览器插件",
     "p.shengshui.desc": "一款Manifest V3浏览器插件，把大语言模型对话背后隐藏的能源与水资源消耗实时可视化。开发过程中从最初的游戏化行为改变工具，重新定位为教育优先的透明化信息工具——测试后发现游戏化机制并没有真正改变任何人的使用习惯，诚实的目标是提升认知，而不是强制约束行为。所有估算数字均引用自已发表的研究（Jegham et al., 2025），而非凭空编造。",
     "p.shengshui.status": "原型阶段",
     "p.pit.tag1": "结构设计",
@@ -378,8 +379,11 @@ const translations = {
     "p.pit.desc": "设计杭州某博物馆6.5米深基坑（占地125,200平方米）的完整围护体系，通过多方案比选选定钻孔灌注桩+双头深层搅拌桩（CSM）止水帷幕方案。采用等效刚度法与同济抛物线地表沉降模型，计算三个开挖阶段的桩体内力、变形包络线及稳定性安全系数（整体滑动安全系数K=3.56，坑底隆起安全系数K=2.2）。完成6张AutoCAD施工图及一份15,000字中英双语设计报告，含完整监测方案。",
     "p.pit.status": "案例研究 ↗",
     "contact.title": "联系方式",
-    "contact.blurb": "正在积极寻找全职产品岗位——无障碍与适老化科技方向——2026年8月毕业后可随时到岗。",
+    "contact.blurb": "正在积极寻找全职产品经理岗位——AI产品方向 / 无障碍与适老化科技方向——目标中国，2026年8月毕业后可随时到岗。",
+    "contact.phone": "电话",
     "contact.email": "邮箱",
+    "contact.boss": "BOSS直聘",
+    "contact.bossHint": "链接待补充",
     "contact.cvzh": "简历（中文）",
     "contact.cven": "简历（英文）",
     "contact.download": "下载 PDF ↓",
