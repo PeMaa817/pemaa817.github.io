@@ -6,8 +6,8 @@
 <title>都柏林租房地图</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css"/>
+<script src="vendor/leaflet/leaflet.js"></script>
 <!-- Google Maps loaded dynamically after key is available -->
 <style>
 :root {
@@ -709,8 +709,8 @@ textarea { resize: vertical; min-height: 72px; }
       <div class="form-row full">
         <div class="form-group">
           <label>地址（越详细越好，用于地图定位）</label>
-          <input type="text" id="f-addr" placeholder="如：12 Ranelagh Road, Dublin 6" />
-          <div style="font-size:11px;color:var(--muted);margin-top:3px">填完地址后点「定位」按钮在地图上确认位置</div>
+          <input type="text" id="f-addr" placeholder="如：12 Ranelagh Road, D06 XY12" />
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">建议带上Eircode（爱尔兰邮编，如 D06 XY12），定位会更准确</div>
         </div>
       </div>
 
@@ -820,11 +820,13 @@ textarea { resize: vertical; min-height: 72px; }
       <div class="form-row">
         <div class="form-group">
           <label>地点名称</label>
-          <input type="text" id="poi-name" placeholder="如：UCD / Google Dublin" />
+          <input type="text" id="poi-name" placeholder="如：学校 / 超市 / 健身房" />
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">可以自由填写，方便自己认就行，不影响定位</div>
         </div>
         <div class="form-group">
           <label>地址</label>
-          <input type="text" id="poi-addr" placeholder="如：UCD, Belfield, Dublin 4" />
+          <input type="text" id="poi-addr" placeholder="如：UCD, Belfield, D04 或 Eircode" />
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">建议带上Eircode（爱尔兰邮编），定位会更准确</div>
         </div>
       </div>
       <button class="btn btn-primary btn-sm" onclick="addPoi()" style="align-self:flex-start">添加地点</button>
@@ -957,6 +959,13 @@ function initMap() {
 }
 
 function initLeaflet() {
+  if (typeof L === 'undefined') {
+    // 地图库没加载成功（网络问题），不要整页崩掉，给个友好提示，其余功能（列表/添加/对比）照常可用
+    const mapEl = document.getElementById('map');
+    if (mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8a8070;font-size:13px;text-align:center;padding:20px;">地图加载失败，请刷新页面重试<br/>（不影响下方房源列表的添加和查看）</div>';
+    showToast('地图加载失败，请检查网络后刷新');
+    return;
+  }
   map = L.map('map', { zoomControl: false }).setView([53.3498, -6.2603], 12);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap © CARTO',
@@ -1439,9 +1448,32 @@ async function saveListing() {
   showToast(editingId ? '已更新 ✓' : '已添加 ✓');
 }
 
-function deleteListing() {
+// 自定义确认弹窗：替代浏览器原生 confirm()。
+// 原生 confirm() 在小红书/微信等App内置浏览器里经常被静默拦截或直接返回false，
+// 会出现"点了删除但完全没反应"的问题，所以这里用自己写的小弹窗代替。
+function customConfirm(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:22px 22px 16px;max-width:280px;width:88%;box-shadow:0 24px 64px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:14.5px;color:#1b2530;margin-bottom:18px;line-height:1.5;">${message}</div>
+        <div style="display:flex;gap:10px;">
+          <button id="cc-cancel" style="flex:1;border:none;border-radius:8px;padding:9px 6px;font-size:13.5px;cursor:pointer;background:#e2e8f0;color:#38475a;">取消</button>
+          <button id="cc-ok" style="flex:1;border:none;border-radius:8px;padding:9px 6px;font-size:13.5px;cursor:pointer;background:#e0524a;color:#fff;">确定删除</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const cleanup = (result) => { overlay.remove(); resolve(result); };
+    overlay.querySelector('#cc-ok').addEventListener('click', () => cleanup(true));
+    overlay.querySelector('#cc-cancel').addEventListener('click', () => cleanup(false));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+  });
+}
+
+async function deleteListing() {
   if (!editingId) return;
-  if (!confirm('确定删除这个房源？')) return;
+  if (!(await customConfirm('确定删除这个房源？'))) return;
   listings = listings.filter(l => l.id !== editingId);
   compareSelected = compareSelected.filter(id => id !== editingId);
   save();
