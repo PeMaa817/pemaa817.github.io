@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>省水小碗 — Yangzong Baima</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0e0e; --surface: #161616; --border: #272727;
+      --accent: #c8f060; --accent2: #60c8f0;
+      --text: #e8e8e0; --muted: #888880; --tag-bg: #1e1e1e;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', 'Noto Sans SC', sans-serif; font-weight: 300; line-height: 1.7; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 48px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(14,14,14,0.95), transparent); }
+    .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 0.1em; color: var(--accent); text-decoration: none; }
+    .nav-right { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    #lang-toggle { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 20px; padding: 6px 4px; cursor: pointer; display: flex; align-items: center; gap: 2px; }
+    #lang-toggle span { padding: 3px 9px; border-radius: 14px; transition: all 0.2s; }
+    #lang-toggle span.active { background: var(--accent); color: #0e0e0e; }
+    main { max-width: 760px; margin: 0 auto; padding: 140px 24px 100px; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .tag { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 2px; background: var(--tag-bg); border: 1px solid var(--border); color: var(--muted); }
+    .tag.highlight { border-color: var(--accent); color: var(--accent); }
+    .tag.blue { border-color: var(--accent2); color: var(--accent2); }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(30px, 4vw, 42px); letter-spacing: -0.02em; margin-bottom: 20px; line-height: 1.2; }
+    .status-line { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+    .status-badge { display: inline-block; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent); padding: 2px 8px; border-radius: 2px; }
+    p { color: var(--muted); font-size: 15.5px; margin-bottom: 22px; max-width: 620px; }
+    p strong { color: var(--text); font-weight: 400; }
+    h2 { font-family: 'DM Serif Display', serif; font-size: 20px; margin: 44px 0 16px; letter-spacing: -0.01em; }
+    ol, ul { color: var(--muted); font-size: 14.5px; margin: 0 0 22px 20px; }
+    li { margin-bottom: 8px; }
+    .note { background: var(--surface); border: 1px solid var(--border); border-left: 2px solid var(--accent2); border-radius: 4px; padding: 16px 20px; font-size: 13.5px; color: var(--muted); margin-bottom: 28px; }
+    .btn-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 28px 0 8px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-decoration: none; border-radius: 2px; transition: all 0.2s; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #0e0e0e; border: none; }
+    .btn-primary:hover { background: #d8ff70; transform: translateY(-1px); }
+    .btn-ghost { border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+    code { font-family: 'DM Mono', monospace; font-size: 13px; background: var(--tag-bg); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; color: var(--accent2); }
+    footer { border-top: 1px solid var(--border); padding: 32px 48px; text-align: center; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin: 0; }
+    @media (max-width: 640px) {
+      nav { padding: 16px 20px; }
+      main { padding: 110px 20px 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="../index.html" class="nav-logo" data-i18n="nav.logo">Yangzong Baima</a>
+    <div class="nav-right">
+      <div class="nav-links"><a href="../index.html#work" data-i18n="nav.back">← Back to Portfolio</a></div>
+      <button id="lang-toggle" aria-label="Switch language">
+        <span data-lang-btn="en">EN</span><span data-lang-btn="zh">中文</span>
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="tags">
+      <span class="tag highlight" data-i18n="tag1">Chrome Extension</span>
+      <span class="tag blue" data-i18n="tag2">Sustainability</span>
+      <span class="tag" data-i18n="tag3">AI Transparency</span>
+      <span class="tag" data-i18n="tag4">Manifest V3</span>
+    </div>
+
+    <h1 data-i18n-html="title">省水小碗 — AI Energy &amp; Water Transparency Extension</h1>
+
+    <div class="status-line">
+      <span class="status-badge" data-i18n="status">Prototype · Developer Mode Only</span>
+      <span data-i18n="year">2026 – Present</span>
+    </div>
+
+    <p data-i18n="desc1">A Manifest V3 browser extension that makes the hidden energy and water cost of LLM conversations visible in real time. Every time you send a message to an AI chatbot, a small animal walks up to a water bowl on the popup and "drinks" — a lightweight, playful way of making an invisible cost visible.</p>
+
+    <p data-i18n="desc2">Repositioned mid-build from a gamified behaviour-change tool into an education-first transparency tool, once early testing showed the gamification wasn't actually changing anyone's usage. The honest goal is awareness, not enforced restraint — so the extension never blocks, nags, or scores you. Every energy/water estimate is grounded in a published research source (Jegham et al., 2025) rather than an invented number.</p>
+
+    <div class="note" data-i18n-html="note">
+      <strong>Current status:</strong> this is a working prototype, tested locally in developer mode. It has not yet been submitted to the Chrome Web Store, so for now it needs to be installed manually from the downloaded files below.
+    </div>
+
+    <div class="btn-row">
+      <a href="省水小碗.zip" class="btn btn-primary" data-i18n="download">Download Extension (.zip) ↓</a>
+    </div>
+
+    <h2 data-i18n="howtitle">How to install (developer mode)</h2>
+    <ol>
+      <li data-i18n="step1">Download and unzip the file above.</li>
+      <li data-i18n-html="step2">Open <code>chrome://extensions</code> in Chrome.</li>
+      <li data-i18n="step3">Turn on "Developer mode" in the top-right corner.</li>
+      <li data-i18n="step4">Click "Load unpacked" and select the unzipped folder.</li>
+      <li data-i18n="step5">The 省水小碗 icon will appear in your toolbar — click it to see the water-drinking animation while you chat with an AI.</li>
+    </ol>
+  </main>
+
+  <footer>
+    <p data-i18n="footer">© 2026 Yangzong Baima · Hosted on GitHub Pages</p>
+  </footer>
+
+<script>
+const translations = {
+  en: {
+    "nav.logo": "Yangzong Baima",
+    "nav.back": "← Back to Portfolio",
+    "tag1": "Chrome Extension",
+    "tag2": "Sustainability",
+    "tag3": "AI Transparency",
+    "tag4": "Manifest V3",
+    "title": "省水小碗 — AI Energy &amp; Water Transparency Extension",
+    "status": "Prototype · Developer Mode Only",
+    "year": "2026 – Present",
+    "desc1": "A Manifest V3 browser extension that makes the hidden energy and water cost of LLM conversations visible in real time. Every time you send a message to an AI chatbot, a small animal walks up to a water bowl on the popup and \"drinks\" — a lightweight, playful way of making an invisible cost visible.",
+    "desc2": "Repositioned mid-build from a gamified behaviour-change tool into an education-first transparency tool, once early testing showed the gamification wasn't actually changing anyone's usage. The honest goal is awareness, not enforced restraint — so the extension never blocks, nags, or scores you. Every energy/water estimate is grounded in a published research source (Jegham et al., 2025) rather than an invented number.",
+    "note": "<strong>Current status:</strong> this is a working prototype, tested locally in developer mode. It has not yet been submitted to the Chrome Web Store, so for now it needs to be installed manually from the downloaded files below.",
+    "download": "Download Extension (.zip) ↓",
+    "howtitle": "How to install (developer mode)",
+    "step1": "Download and unzip the file above.",
+    "step2": "Open <code>chrome://extensions</code> in Chrome.",
+    "step3": "Turn on \"Developer mode\" in the top-right corner.",
+    "step4": "Click \"Load unpacked\" and select the unzipped folder.",
+    "step5": "The 省水小碗 icon will appear in your toolbar — click it to see the water-drinking animation while you chat with an AI.",
+    "footer": "© 2026 Yangzong Baima · Hosted on GitHub Pages"
+  },
+  zh: {
+    "nav.logo": "白玛央宗",
+    "nav.back": "← 返回作品集",
+    "tag1": "Chrome插件",
+    "tag2": "可持续发展",
+    "tag3": "AI透明度",
+    "tag4": "Manifest V3",
+    "title": "省水小碗 —— AI能耗与水耗透明化插件",
+    "status": "原型阶段 · 仅限开发者模式",
+    "year": "2026 至今",
+    "desc1": "一款Manifest V3浏览器插件，实时可视化AI对话背后被隐藏的能源与水资源消耗。每次向AI聊天机器人发送一条消息，弹窗里的小动物就会走到水碗边\"喝水\"——用轻量、有趣的方式，让原本看不见的成本变得可感知。",
+    "desc2": "开发过程中做过一次方向调整：最初想做成\"游戏化行为改变\"工具，但早期测试发现游戏化机制并没有真正改变任何人的使用习惯，于是转向以\"科普/透明化\"为核心目标——不阻止、不说教、不打分，只是让人看见成本。每一条能耗/水耗估算数据都基于已发表的研究来源（Jegham et al., 2025），而非凭空编造的数字。",
+    "note": "<strong>当前状态：</strong>目前是一个已跑通的原型，本地开发者模式下测试通过，尚未提交到Chrome网上应用店，所以现在需要通过下面的文件手动安装。",
+    "download": "下载插件安装包 (.zip) ↓",
+    "howtitle": "如何安装（开发者模式）",
+    "step1": "下载并解压上面的文件。",
+    "step2": "在Chrome中打开 <code>chrome://extensions</code>。",
+    "step3": "打开右上角的\"开发者模式\"。",
+    "step4": "点击\"加载已解压的扩展程序\"，选择解压后的文件夹。",
+    "step5": "工具栏会出现省水小碗的图标，点击它，和AI聊天时就能看到小动物喝水的动画。",
+    "footer": "© 2026 白玛央宗 · 部署于 GitHub Pages"
+  }
+};
+
+function detectInitialLang() {
+  try {
+    const saved = localStorage.getItem('site_lang');
+    if (saved === 'en' || saved === 'zh') return saved;
+  } catch (e) {}
+  return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
+function applyLanguage(lang) {
+  const dict = translations[lang];
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-lang-btn]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-lang-btn') === lang);
+  });
+  try { localStorage.setItem('site_lang', lang); } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const initial = detectInitialLang();
+  applyLanguage(initial);
+  document.getElementById('lang-toggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-lang-btn]');
+    const current = document.documentElement.lang.startsWith('zh') ? 'zh' : 'en';
+    const next = btn ? btn.getAttribute('data-lang-btn') : (current === 'en' ? 'zh' : 'en');
+    applyLanguage(next);
+  });
+});
+</script>
+
+</body>
+</html>
